@@ -1,0 +1,12 @@
+{
+  "name": "online-game-voucher-generator",
+  "version": "1.0.0",
+  "description": "Aplikasi dagang voucher game online dengan sistem generate",
+  "main": "server.js",
+  "repository": "https://github.com/AYMafaza/online-game-voucher-generator.git",
+  "author": "garudamalang@gmail.com <garudamalang@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
