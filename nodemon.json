@@ -1,0 +1,7 @@
+{
+  "env": {
+    "NODE_ENV": "development",
+    "DATABASE_CONNECTION_STRING": "mongodb+srv://vouchers:12345@recontest-2ep8u.mongodb.net/test",
+    "JWT_SECRET_KEY": "Stup1dWaLL4Byi5MySup3r*"
+  }
+}

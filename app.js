@@ -9,10 +9,11 @@ const publisherRoutes = require("./api/routes/publishers");
 const generateRoutes = require("./api/routes/generate");
 const userRoutes = require("./api/routes/users");
 
-mongoose.connect(
-  "mongodb+srv://vouchers:12345@recontest-2ep8u.mongodb.net/test",
-  { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
-);
+mongoose.connect(process.env.DATABASE_CONNECTION_STRING, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true
+});
 
 const app = express();
 

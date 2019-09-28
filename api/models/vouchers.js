@@ -6,6 +6,8 @@ const voucherSchema = mongoose.Schema({
   buyingPrice: { type: Number, default: 0 },
   sellingPrice: { type: Number, default: 0 },
   generated: { type: Boolean, default: false },
+  addedBy: { type: mongoose.Schema.Types.ObjectId },
+  generatedBy: { type: mongoose.Schema.Types.ObjectId },
   insertedAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() }
 });

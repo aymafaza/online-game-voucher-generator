@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Voucher = require("../models/vouchers");
 const Publisher = require("../models/publishers");
+const checkAuth = require("../middleware/check-auth");
 
-router.get("/", async (req, res, next) => {
+router.get("/", checkAuth, async (req, res, next) => {
   try {
     const result = await Voucher.find().populate("publisher", "_id name");
 
