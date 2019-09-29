@@ -4,7 +4,7 @@ const Voucher = require("../models/vouchers");
 const Publisher = require("../models/publishers");
 const checkAuth = require("../middleware/check-auth");
 
-router.get("/", checkAuth, async (req, res, next) => {
+router.get("/", checkAuth("admin"), async (req, res, next) => {
   try {
     const result = await Voucher.find().populate("publisher", "_id name");
 
@@ -18,13 +18,61 @@ router.get("/", checkAuth, async (req, res, next) => {
   }
 });
 
-router.get("/:id", (req, res, next) => {
-  const { id } = req.params;
-  res.status(200).json({
-    code: 200,
-    data: id,
-    message: "GET voucher by id"
-  });
+// router.get("/:id", (req, res, next) => {
+//   const { id } = req.params;
+//   res.status(200).json({
+//     code: 200,
+//     data: id,
+//     message: "GET voucher by id"
+//   });
+// });
+
+router.get("/generate", async (req, res, next) => {
+  try {
+    const result = await Voucher.findOneAndUpdate(
+      {
+        generated: { $ne: true }
+      },
+      { $set: { generated: true } }
+    ).populate("publisher", "_id name");
+    let message;
+    if (result) {
+      message = "GET all voucher";
+    } else {
+      message = "Out of stock";
+    }
+    res.status(200).json({
+      code: 200,
+      data: result,
+      message
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/next", async (req, res, next) => {
+  try {
+    const result = await Voucher.findOne({
+      generated: { $ne: true }
+    })
+      .select("sellingPrice buyingPrice")
+      .populate("publisher", "_id name");
+
+    let message;
+    if (result) {
+      message = "GET all voucher";
+    } else {
+      message = "Out of stock";
+    }
+    res.status(200).json({
+      code: 200,
+      data: result,
+      message
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post("/", async (req, res, next) => {

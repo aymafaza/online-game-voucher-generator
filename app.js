@@ -6,7 +6,6 @@ const mongoose = require("mongoose");
 
 const voucherRoutes = require("./api/routes/vouchers");
 const publisherRoutes = require("./api/routes/publishers");
-const generateRoutes = require("./api/routes/generate");
 const userRoutes = require("./api/routes/users");
 
 mongoose.connect(process.env.DATABASE_CONNECTION_STRING, {
@@ -23,7 +22,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use("/vouchers", voucherRoutes);
-app.use("/generate", generateRoutes);
 app.use("/user", userRoutes);
 app.use("/publishers", publisherRoutes);
 
