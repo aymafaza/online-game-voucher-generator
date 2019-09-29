@@ -7,8 +7,9 @@ const checkAuth = require("../middleware/check-auth");
 router.get("/", checkAuth("admin"), async (req, res, next) => {
   try {
     const result = await Voucher.find()
-      .populate("publisher", "_id name")
-      .populate("user", "name");
+      .populate("publisher", "name")
+      .populate("addedBy", "username")
+      .populate("generatedBy", "username");
     res.status(200).json({
       code: 200,
       data: result,
@@ -18,15 +19,6 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
     next(error);
   }
 });
-
-// router.get("/:id", (req, res, next) => {
-//   const { id } = req.params;
-//   res.status(200).json({
-//     code: 200,
-//     data: id,
-//     message: "GET voucher by id"
-//   });
-// });
 
 router.get("/generate", checkAuth("admin"), async (req, res, next) => {
   try {
@@ -55,7 +47,7 @@ router.get("/generate", checkAuth("admin"), async (req, res, next) => {
   }
 });
 
-router.get("/next", async (req, res, next) => {
+router.get("/next", checkAuth("admin"), async (req, res, next) => {
   try {
     const result = await Voucher.findOne({
       generated: { $ne: true }
@@ -79,13 +71,29 @@ router.get("/next", async (req, res, next) => {
   }
 });
 
+router.get("/:id", async (req, res, next) => {
+  try {
+    const result = await Voucher.findById(req.params.id)
+      .populate("publisher", "name")
+      .populate("addedBy", "username")
+      .populate("generatedBy", "username");
+    res.status(200).json({
+      code: 200,
+      data: result,
+      message: "GET all voucher"
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/", checkAuth("admin"), async (req, res, next) => {
   try {
     let result;
     let data = req.body;
     // If input is array then do bulk insert
     if (Array.isArray(req.body)) {
-      let failed = [];
+      let failed = null;
       // Add user id to every inserted data
       const insertData = data.map(async val => {
         const newData = { ...val, addedBy: req.userData._id };
@@ -123,7 +131,10 @@ router.post("/", checkAuth("admin"), async (req, res, next) => {
       }
 
       // Add user id to inserted data
-      result = await Voucher.create({ ...data, addedBy: req.userData._id });
+      result = {
+        success: await Voucher.create({ ...data, addedBy: req.userData._id }),
+        failed: null
+      };
     }
 
     res.status(200).json({
