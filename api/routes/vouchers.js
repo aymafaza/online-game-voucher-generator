@@ -6,8 +6,9 @@ const checkAuth = require("../middleware/check-auth");
 
 router.get("/", checkAuth("admin"), async (req, res, next) => {
   try {
-    const result = await Voucher.find().populate("publisher", "_id name");
-
+    const result = await Voucher.find()
+      .populate("publisher", "_id name")
+      .populate("user", "name");
     res.status(200).json({
       code: 200,
       data: result,
@@ -27,20 +28,23 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
 //   });
 // });
 
-router.get("/generate", async (req, res, next) => {
+router.get("/generate", checkAuth("admin"), async (req, res, next) => {
   try {
+    // Add id generated user
     const result = await Voucher.findOneAndUpdate(
       {
         generated: { $ne: true }
       },
-      { $set: { generated: true } }
+      { $set: { generated: true, generatedBy: req.userData._id } }
     ).populate("publisher", "_id name");
+
     let message;
     if (result) {
       message = "GET all voucher";
     } else {
       message = "Out of stock";
     }
+
     res.status(200).json({
       code: 200,
       data: result,
@@ -75,25 +79,51 @@ router.get("/next", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", checkAuth("admin"), async (req, res, next) => {
   try {
     let result;
-    const data = req.body;
+    let data = req.body;
     // If input is array then do bulk insert
     if (Array.isArray(req.body)) {
-      result = await Voucher.insertMany(data);
-    } else {
-      const { publisher, key, buyingPrice, sellingPrice, generated } = req.body;
+      let failed = [];
+      // Add user id to every inserted data
+      const insertData = data.map(async val => {
+        const newData = { ...val, addedBy: req.userData._id };
 
+        const isPublisherValid = await Publisher.findById({
+          _id: newData.publisher
+        });
+
+        if (!isPublisherValid) {
+          // throw { status: 400, message: "Invalid Publisher ID" };
+          failed.push({ ...newData, errorMessage: "Invalid Publisher ID" });
+          return;
+        }
+
+        // Add user id to inserted data
+        result = await Voucher.create(newData);
+        return newData;
+      });
+
+      const success = await Promise.all(insertData);
+
+      // Filter only success insert
+      result = {
+        success: success.filter(val => val),
+        failed
+      };
+    } else {
+      // Validate voucher publisher by id
       const isPublisherValid = await Publisher.findById({
-        _id: publisher
-      }).exec();
+        _id: data.publisher
+      });
 
       if (!isPublisherValid) {
         throw { status: 400, message: "Invalid Publisher ID" };
       }
 
-      result = await Voucher.create(data);
+      // Add user id to inserted data
+      result = await Voucher.create({ ...data, addedBy: req.userData._id });
     }
 
     res.status(200).json({
