@@ -20,6 +20,22 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
   }
 });
 
+router.get("/user", checkAuth("admin"), async (req, res, next) => {
+  try {
+    const result = await Voucher.find({ generatedBy: req.userData._id })
+      .populate("publisher", "name")
+      .populate("addedBy", "username")
+      .populate("generatedBy", "username");
+    res.status(200).json({
+      code: 200,
+      data: result,
+      message: "GET all voucher"
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/generate", checkAuth("admin"), async (req, res, next) => {
   try {
     // Add id generated user
@@ -27,7 +43,13 @@ router.get("/generate", checkAuth("admin"), async (req, res, next) => {
       {
         generated: { $ne: true }
       },
-      { $set: { generated: true, generatedBy: req.userData._id } }
+      {
+        $set: {
+          generated: true,
+          generatedBy: req.userData._id,
+          updatedAt: Date.now()
+        }
+      }
     ).populate("publisher", "_id name");
 
     let message;
