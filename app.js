@@ -3,6 +3,10 @@ const cors = require("cors");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 
+// Swagger UI Express
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./api/documentation/swaggerJSDoc.js");
+
 const voucherRoutes = require("./api/routes/vouchers");
 const publisherRoutes = require("./api/routes/publishers");
 const userRoutes = require("./api/routes/users");
@@ -23,6 +27,9 @@ app.use(express.json());
 app.use("/vouchers", voucherRoutes);
 app.use("/users", userRoutes);
 app.use("/publishers", publisherRoutes);
+
+// Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use((req, res, next) => {
   const error = new Error("Not Found");

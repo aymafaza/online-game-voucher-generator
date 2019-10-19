@@ -69,7 +69,7 @@ router.get("/generate", checkAuth("admin"), async (req, res, next) => {
   }
 });
 
-router.get("/next", checkAuth("admin"), async (req, res, next) => {
+router.get("/checkprice", checkAuth("admin"), async (req, res, next) => {
   try {
     const result = await Voucher.findOne({
       generated: { $ne: true }
@@ -98,7 +98,7 @@ router.get("/:id", async (req, res, next) => {
     const result = await Voucher.findById(req.params.id)
       .populate("publisher", "name")
       .populate("addedBy", "username")
-      .populate("generatedBy", "username");
+      .populate(" ", "username");
     res.status(200).json({
       code: 200,
       data: result,
