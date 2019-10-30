@@ -19,7 +19,7 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
       ];
     }
 
-    const result = await Publisher.find(query);
+    const result = await Publisher.find(query).lean();
     res.status(200).json({
       code: 200,
       data: result,

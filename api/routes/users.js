@@ -31,7 +31,7 @@ router.post("/login", async (req, res, next) => {
 
     const user = await User.findOne({
       $or: [{ username }, { email: username }]
-    });
+    }).lean();
 
     if (!user) {
       throw { code: 400, message: "Invalid username or email" };

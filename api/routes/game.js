@@ -19,7 +19,9 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
       ];
     }
 
-    const result = await Game.find(query).populate("publisher", "name");
+    const result = await Game.find(query)
+      .populate("publisher", "name")
+      .lean();
     res.status(200).json({
       code: 200,
       data: result,

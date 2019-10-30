@@ -6,11 +6,20 @@ const checkAuth = require("../middleware/check-auth");
 
 router.get("/", checkAuth("admin"), async (req, res, next) => {
   try {
-    const { generated } = req.query;
-    const result = await Voucher.find({ generated })
+    const { id, generated } = req.query;
+    // Create query
+    let query = {};
+    if (id) {
+      query["_id"] = id;
+    }
+    if (generated) {
+      query["generated"] = generated;
+    }
+    const result = await Voucher.find(query)
       .populate("publisher", "name")
       .populate("addedBy", "username")
-      .populate("generatedBy", "username");
+      .populate("generatedBy", "username")
+      .lean();
     res.status(200).json({
       code: 200,
       data: result,
@@ -155,22 +164,6 @@ router.get("/checkprice", checkAuth("admin"), async (req, res, next) => {
       code: 200,
       data: result,
       message
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/:id", async (req, res, next) => {
-  try {
-    const result = await Voucher.findById(req.params.id)
-      .populate("publisher", "name")
-      .populate("addedBy", "username")
-      .populate(" ", "username");
-    res.status(200).json({
-      code: 200,
-      data: result,
-      message: "GET voucher by id"
     });
   } catch (error) {
     next(error);
