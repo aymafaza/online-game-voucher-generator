@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Publisher = require("../models/publishers");
+const Game = require("../models/game");
 const checkAuth = require("../middleware/check-auth");
 
 router.get("/", checkAuth("admin"), async (req, res, next) => {
@@ -19,11 +19,11 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
       ];
     }
 
-    const result = await Publisher.find(query);
+    const result = await Game.find(query).populate("publisher", "name");
     res.status(200).json({
       code: 200,
       data: result,
-      message: "Get all publisher"
+      message: "Get all game"
     });
   } catch (error) {
     next(error);
@@ -32,14 +32,14 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
 
 router.post("/", checkAuth("admin"), async (req, res, next) => {
   try {
-    const { name } = req.body;
+    const { name, publisher } = req.body;
 
-    result = await Publisher.create({ name });
+    result = await Game.create({ name, publisher });
 
     res.status(200).json({
       code: 200,
       data: result,
-      message: "Post publisher"
+      message: "Post Game"
     });
   } catch (error) {
     next(error);
@@ -49,7 +49,7 @@ router.post("/", checkAuth("admin"), async (req, res, next) => {
 router.delete("/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
-    const result = await Publisher.findByIdAndDelete(id);
+    const result = await Game.findByIdAndDelete(id);
     let message = "1 Row deleted";
     if (!result) {
       message = "Data not found 0 row deleted";

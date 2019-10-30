@@ -6,8 +6,7 @@ const options = {
     openapi: "3.0.2",
     info: {
       title: "Online game voucher generator swagger documentation",
-      description:
-        "Add stock and sell online game voucher or game key. By using generate system you can manage your selling to agent.",
+      description: `<img src="https://6.viki.io/image/686f944090c3407996e03a9715882f7d.jpeg?s=900x600&e=t"> <br /> Add stock and sell online game voucher or game key. By using generate system you can manage your selling to agent.`,
       termsOfService: "https://google.com",
       contact: {
         name: "Ahmad Yusqie Mafaza",
@@ -15,8 +14,8 @@ const options = {
         email: "yusqie@alterra.id"
       },
       license: {
-        name: "Apache 2.0",
-        url: "https://www.apache.org/licenses/LICENSE-2.0.html"
+        name: "MIT License  ",
+        url: "https://opensource.org/licenses/MIT"
       },
       version: "1.0.0"
     },
@@ -25,7 +24,7 @@ const options = {
     ]
   },
   // List of files to be processes. You can also set globs './routes/*.js'
-  apis: ["endpoints.js"]
+  apis: ["./routes/*.js"]
 };
 
 const specs = swaggerJsdoc(options);

@@ -1,9 +1,14 @@
 const mongoose = require("mongoose");
 
-const voucherSchema = mongoose.Schema({
+const gameKeySchema = mongoose.Schema({
   publisher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Publisher",
+    required: true
+  },
+  game: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Game",
     required: true
   },
   key: { type: String, required: true },
@@ -16,4 +21,4 @@ const voucherSchema = mongoose.Schema({
   updatedAt: { type: Date, default: Date.now() }
 });
 
-module.exports = mongoose.model("Voucher", voucherSchema);
+module.exports = mongoose.model("Gamekey", gameKeySchema);

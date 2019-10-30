@@ -1,20 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const Voucher = require("../models/vouchers");
+const Gamekey = require("../models/gamekey");
 const Publisher = require("../models/publishers");
 const checkAuth = require("../middleware/check-auth");
 
 router.get("/", checkAuth("admin"), async (req, res, next) => {
   try {
-    const { generated } = req.query;
-    const result = await Voucher.find({ generated })
+    const result = await Gamekey.find()
       .populate("publisher", "name")
       .populate("addedBy", "username")
       .populate("generatedBy", "username");
     res.status(200).json({
       code: 200,
       data: result,
-      message: "GET all voucher"
+      message: "GET all game key"
     });
   } catch (error) {
     next(error);
@@ -23,14 +22,14 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
 
 router.get("/user", checkAuth("admin"), async (req, res, next) => {
   try {
-    const result = await Voucher.find({ addedBy: req.userData._id })
+    const result = await Gamekey.find({ generatedBy: req.userData._id })
       .populate("publisher", "name")
       .populate("addedBy", "username")
       .populate("generatedBy", "username");
     res.status(200).json({
       code: 200,
       data: result,
-      message: "GET all voucher added by current user"
+      message: "GET all gamekey"
     });
   } catch (error) {
     next(error);
@@ -40,17 +39,18 @@ router.get("/user", checkAuth("admin"), async (req, res, next) => {
 router.get("/generate", checkAuth("admin"), async (req, res, next) => {
   try {
     const { publisher, game } = req.query;
-    if (!publisher) {
-      const Error = { message: "Please define publisher" };
+    if (!publisher || !game) {
+      const Error = { message: "Please define publisher & game" };
       throw Error;
     }
 
     let result;
     // Add id generated user
-    result = await Voucher.findOneAndUpdate(
+    result = await Gamekey.findOneAndUpdate(
       {
         generated: { $ne: true },
-        publisher
+        publisher,
+        game
       },
       {
         $set: {
@@ -59,11 +59,13 @@ router.get("/generate", checkAuth("admin"), async (req, res, next) => {
           updatedAt: Date.now()
         }
       }
-    ).populate("publisher", "_id name");
+    )
+      .populate("publisher", "_id name")
+      .populate("game", "_id name");
 
     let message;
     if (result) {
-      message = "Generate voucher";
+      message = "Generate game";
     } else {
       message = "Out of stock";
     }
@@ -81,42 +83,20 @@ router.get("/generate", checkAuth("admin"), async (req, res, next) => {
 router.get("/generated", checkAuth("admin"), async (req, res, next) => {
   try {
     // Add id generated user
-    const result = await Voucher.find({
-      $and: [{ generated: { $eq: true } }]
-    }).populate("publisher", "_id name");
-
-    let message;
-    if (result) {
-      message = "GET all generated voucher";
-    } else {
-      message = "Out of stock";
-    }
-
-    res.status(200).json({
-      code: 200,
-      data: result,
-      message
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/generated/user", checkAuth("admin"), async (req, res, next) => {
-  try {
-    // Add id generated user
-    const result = await Voucher.find({
+    const result = await Gamekey.find({
       $and: [
         { generated: { $eq: true } },
         {
           generatedBy: req.userData._id
         }
       ]
-    }).populate("publisher", "_id name");
+    })
+      .populate("publisher", "_id name")
+      .populate("game", "_id name");
 
     let message;
     if (result) {
-      message = "GET all generated voucher by current user";
+      message = "GET generated game key";
     } else {
       message = "Out of stock";
     }
@@ -133,21 +113,16 @@ router.get("/generated/user", checkAuth("admin"), async (req, res, next) => {
 
 router.get("/checkprice", checkAuth("admin"), async (req, res, next) => {
   try {
-    const { publisher } = req.query;
-    if (!publisher) {
-      const Error = { message: "Insert publisher" };
-      throw Error;
-    }
-    const result = await Voucher.findOne({
-      generated: { $ne: true },
-      publisher
+    const result = await Gamekey.findOne({
+      generated: { $ne: true }
     })
       .select("sellingPrice buyingPrice")
-      .populate("publisher", "_id name");
+      .populate("publisher", "_id name")
+      .populate("game", "_id name");
 
     let message;
     if (result) {
-      message = "GET voucher price";
+      message = "Check game key price";
     } else {
       message = "Out of stock";
     }
@@ -163,14 +138,14 @@ router.get("/checkprice", checkAuth("admin"), async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
   try {
-    const result = await Voucher.findById(req.params.id)
+    const result = await Gamekey.findById(req.params.id)
       .populate("publisher", "name")
       .populate("addedBy", "username")
       .populate(" ", "username");
     res.status(200).json({
       code: 200,
       data: result,
-      message: "GET voucher by id"
+      message: "GET all voucher"
     });
   } catch (error) {
     next(error);
@@ -199,7 +174,7 @@ router.post("/", checkAuth("admin"), async (req, res, next) => {
         }
 
         // Add user id to inserted data
-        result = await Voucher.create(newData);
+        result = await Gamekey.create(newData);
         return newData;
       });
 
@@ -222,7 +197,7 @@ router.post("/", checkAuth("admin"), async (req, res, next) => {
 
       // Add user id to inserted data
       result = {
-        success: await Voucher.create({ ...data, addedBy: req.userData._id }),
+        success: await Gamekey.create({ ...data, addedBy: req.userData._id }),
         failed: null
       };
     }

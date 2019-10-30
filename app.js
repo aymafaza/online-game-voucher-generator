@@ -10,6 +10,8 @@ const swaggerSpec = require("./api/documentation/swaggerJSDoc.js");
 const voucherRoutes = require("./api/routes/vouchers");
 const publisherRoutes = require("./api/routes/publishers");
 const userRoutes = require("./api/routes/users");
+const gameRoutes = require("./api/routes/game");
+const gameKeyRoutes = require("./api/routes/gamekey");
 
 mongoose.connect(process.env.DATABASE_CONNECTION_STRING, {
   useNewUrlParser: true,
@@ -27,6 +29,8 @@ app.use(express.json());
 app.use("/vouchers", voucherRoutes);
 app.use("/users", userRoutes);
 app.use("/publishers", publisherRoutes);
+app.use("/game", gameRoutes);
+app.use("/gamekey", gameKeyRoutes);
 
 // Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
