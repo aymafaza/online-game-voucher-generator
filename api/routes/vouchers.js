@@ -7,6 +7,12 @@ const checkAuth = require("../middleware/check-auth");
 router.get("/", checkAuth("admin"), async (req, res, next) => {
   try {
     const { id, generated } = req.query;
+    let { limit, page } = req.query;
+
+    // Convert page & limit to integer
+    limit = parseInt(limit);
+    page = parseInt(page);
+
     // Create query
     let query = {};
     if (id) {
@@ -19,6 +25,8 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
       .populate("publisher", "name")
       .populate("addedBy", "username")
       .populate("generatedBy", "username")
+      .skip(limit * page - limit)
+      .limit(limit)
       .lean();
     res.status(200).json({
       code: 200,
@@ -32,10 +40,26 @@ router.get("/", checkAuth("admin"), async (req, res, next) => {
 
 router.get("/user", checkAuth("admin"), async (req, res, next) => {
   try {
-    const result = await Voucher.find({ addedBy: req.userData._id })
+    const { id, generated } = req.query;
+    let { limit, page } = req.query;
+
+    // Convert page & limit to integer
+    limit = parseInt(limit);
+    page = parseInt(page);
+
+    // Create query
+    let query = {};
+    if (id) {
+      query["_id"] = id;
+    }
+
+    const result = await Voucher.find({ ...query, addedBy: req.userData._id })
       .populate("publisher", "name")
       .populate("addedBy", "username")
-      .populate("generatedBy", "username");
+      .populate("generatedBy", "username")
+      .skip(limit * page - limit)
+      .limit(limit)
+      .lean();
     res.status(200).json({
       code: 200,
       data: result,
@@ -73,30 +97,6 @@ router.get("/generate", checkAuth("admin"), async (req, res, next) => {
     let message;
     if (result) {
       message = "Generate voucher";
-    } else {
-      message = "Out of stock";
-    }
-
-    res.status(200).json({
-      code: 200,
-      data: result,
-      message
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/generated", checkAuth("admin"), async (req, res, next) => {
-  try {
-    // Add id generated user
-    const result = await Voucher.find({
-      $and: [{ generated: { $eq: true } }]
-    }).populate("publisher", "_id name");
-
-    let message;
-    if (result) {
-      message = "GET all generated voucher";
     } else {
       message = "Out of stock";
     }

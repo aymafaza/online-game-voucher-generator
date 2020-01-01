@@ -6,7 +6,9 @@ const gameSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Publisher",
     required: true
-  }
+  },
+  platform: { type: String },
+  createdAt: { type: Date, default: new Date() }
 });
 
 gameSchema.index({ name: "text" });
